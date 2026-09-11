@@ -20,9 +20,8 @@
 
     const prefix = fullText.slice(Math.max(0, idx - CONTEXT_LENGTH), idx);
     const suffix = fullText.slice(idx + text.length, idx + text.length + CONTEXT_LENGTH);
-    const containers = window.PinAdapter.getAssistantMessageContainers();
 
-    return { exactText: text, prefix, suffix, messageIndex: containers.indexOf(container) };
+    return { exactText: text, prefix, suffix };
   }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -35,32 +34,13 @@
       return true;
     }
     if (message.type === 'RESOLVE_PIN') {
-      sendResponse(resolvePin(message.pin));
-      return true;
+      resolvePinWithScan(message.pin).then(sendResponse);
+      return true; // نخلي القناة مفتوحة لأن البحث صار غير متزامن (async)
     }
   });
 
-  function resolvePin(pin) {
-    if (!window.PinAdapter) return { found: false };
-    const containers = window.PinAdapter.getAssistantMessageContainers();
-
-    if (pin.messageIndex != null && containers[pin.messageIndex]) {
-      const m = searchInContainer(containers[pin.messageIndex], pin, true);
-      if (m) return finalizeMatch(m);
-    }
-    if (pin.messageIndex != null && containers[pin.messageIndex]) {
-      const m = searchInContainer(containers[pin.messageIndex], pin, false);
-      if (m) return finalizeMatch(m);
-    }
-    for (const c of containers) {
-      const m = searchInContainer(c, pin, true);
-      if (m) return finalizeMatch(m);
-    }
-    for (const c of containers) {
-      const m = searchInContainer(c, pin, false);
-      if (m) return finalizeMatch(m);
-    }
-    return { found: false };
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   function searchInContainer(container, pin, useContext) {
@@ -70,6 +50,54 @@
     if (idx === -1) return null;
     const startOffset = useContext ? idx + pin.prefix.length : idx;
     return { container, startOffset, length: pin.exactText.length };
+  }
+
+  function searchAllVisible(pin) {
+    if (!window.PinAdapter) return null;
+    const containers = window.PinAdapter.getAssistantMessageContainers();
+    for (const c of containers) {
+      const m = searchInContainer(c, pin, true) || searchInContainer(c, pin, false);
+      if (m) return m;
+    }
+    return null;
+  }
+
+  function findScrollContainer(el) {
+    let node = el;
+    while (node && node !== document.body) {
+      const style = window.getComputedStyle(node);
+      if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+
+  async function resolvePinWithScan(pin) {
+    if (!window.PinAdapter) return { found: false };
+
+    // فحص سريع أول: يمديه يكون النص ظاهر أصلاً بدون ما نحتاج نسكرول
+    let match = searchAllVisible(pin);
+    if (match) return finalizeMatch(match);
+
+    const anyContainer = window.PinAdapter.getAssistantMessageContainers()[0];
+    if (!anyContainer) return { found: false };
+    const scrollEl = findScrollContainer(anyContainer);
+
+    scrollEl.scrollTop = 0;
+    await wait(400);
+
+    const maxSteps = 60;
+    for (let i = 0; i < maxSteps; i++) {
+      match = searchAllVisible(pin);
+      if (match) return finalizeMatch(match);
+
+      if (scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 4) break;
+      scrollEl.scrollTop += scrollEl.clientHeight * 0.8;
+      await wait(350);
+    }
+    return { found: false };
   }
 
   function finalizeMatch(match) {
