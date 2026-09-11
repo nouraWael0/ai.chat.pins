@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "AI Chat Pins",
+  "version": "0.1.0",
+  "description": "Pin and return to exact locations inside long ChatGPT and Claude conversations.",
+  "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": ["content-scripts/core.js", "content-scripts/adapters/chatgpt.js"]
+    },
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["content-scripts/core.js", "content-scripts/adapters/claude.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
+}
