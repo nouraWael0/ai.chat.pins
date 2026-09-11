@@ -22,6 +22,10 @@ Instead of saving *where* you were (a coordinate), this extension saves *what* y
 ![Pinned location resolved and highlighted](screenshots/pinned-result.png)
 Clicking a saved pin title from the extension popup instantly jumps to and highlights your pinned context, no matter how far down the conversation has moved.
 
+## Pins are conversation-specific
+
+Every pin is tied to the exact conversation it was created in. This means if you pin a location while studying "Operating Systems" and later open a completely different conversation, say "Software Engineering 2," you will not see the OS pins cluttering that unrelated chat. Each conversation keeps its own independent set of pins, so the popup only ever shows what's relevant to what you're currently reading.
+
 ## Installation (not yet on the Chrome Web Store)
 
 1. Download or clone this repository.
