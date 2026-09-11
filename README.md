@@ -20,6 +20,7 @@ Instead of saving *where* you were (a coordinate), this extension saves *what* y
 ![Pin this location context menu](screenshots/pin-menu.png)
 ![Pin this location context menu](screenshots/extension-popup.png)
 ![Pinned location resolved and highlighted](screenshots/pinned-result.png)
+Clicking a saved pin title from the extension popup instantly jumps to and highlights your pinned context, no matter how far down the conversation has moved.
 
 ## Installation (not yet on the Chrome Web Store)
 
