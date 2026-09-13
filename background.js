@@ -10,7 +10,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== 'pin-this-location' || !tab?.id) return;
 
   chrome.tabs.sendMessage(tab.id, { type: 'GET_LAST_SELECTION' }, async (response) => {
-    if (!response || !response.selection) return;
+    if (chrome.runtime.lastError || !response || !response.selection) return;
 
     const pin = {
       id: crypto.randomUUID(),
@@ -20,7 +20,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       exactText: response.selection.exactText,
       prefix: response.selection.prefix,
       suffix: response.selection.suffix,
-      messageIndex: response.selection.messageIndex,
+      completed: false,
       createdAt: Date.now()
     };
 

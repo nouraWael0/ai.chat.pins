@@ -1,6 +1,27 @@
 body { width: 280px; font-family: system-ui, sans-serif; padding: 12px; }
 h1 { font-size: 15px; margin: 0 0 8px; }
 #pins-list { list-style: none; margin: 0; padding: 0; }
-#pins-list li { padding: 8px; margin-bottom: 6px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; }
+#pins-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
 #pins-list li:hover { background: #f5f5f5; }
 #pins-list li.not-found { color: #b00020; border-color: #b00020; }
+.pin-check { flex-shrink: 0; cursor: pointer; }
+.pin-name { flex: 1; cursor: pointer; }
+.completed .pin-name { text-decoration: line-through; color: #888; }
+.delete-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.delete-btn:hover { background: #ffe0e0; }
